@@ -1,0 +1,21 @@
+name: 'yamal_scout'
+version: '1.0.0'
+config-version: 2
+profile: 'yamal_scout'
+model-paths: ["models"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  yamal_scout:
+    staging:
+      +materialized: view
+      +schema: yamal_staging
+    marts:
+      +materialized: table
+      +schema: yamal_marts
+ 

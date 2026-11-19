@@ -1,0 +1,36 @@
+version: 2
+
+models:
+  - name: stg_espn__gamelog
+    description: "Cleaned ESPN game log: one row per match Lamine Yamal played."
+    data_tests:
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "shots_on_target <= shots"
+    columns:
+      - name: event_id
+        description: "ESPN match id. Primary key."
+        data_tests:
+          - unique
+          - not_null
+      - name: game_date
+        description: "Kick-off timestamp (UTC)."
+        data_tests:
+          - not_null
+      - name: home_away
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['home', 'away']
+      - name: shots
+        description: "Total shots in the match."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: shots_on_target
+        description: "Shots on target. Unreliable in friendlies (ESPN records 0)."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn

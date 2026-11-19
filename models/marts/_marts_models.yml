@@ -1,0 +1,19 @@
+version: 2
+
+models:
+  - name: fct_lamine_matches
+    description: "All matches Lamine Yamal played, for the chat agent. Friendlies flagged."
+    columns:
+      - name: event_id
+        data_tests: [unique, not_null]
+
+  - name: fct_lamine_match_features
+    description: "Model-ready rows: competitive matches only, point-in-time features (no leakage)."
+    columns:
+      - name: event_id
+        data_tests: [unique, not_null]
+      - name: competition_type
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['league', 'champions_league', 'domestic_cup', 'national_team']
