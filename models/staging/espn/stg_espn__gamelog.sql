@@ -1,6 +1,10 @@
 with source as (
 
-    select * from {{ source('espn', 'raw_espn_gamelog') }}
+    select
+        *,
+        cast(split(score, '-')[safe_offset(0)] as int64) as score_first,
+        cast(split(score, '-')[safe_offset(1)] as int64) as score_second
+    from {{ source('espn', 'raw_espn_gamelog') }}
 
 ),
 
@@ -26,7 +30,15 @@ renamed as (
         opponent_name as opponent,
         home_away,
         home_away = 'home' as is_home,
-        score,
+        -- ESPN writes the score winner-first, so in a defeat it reads "3-2" for a 2-3 loss.
+        -- team_goals / opponent_goals put Lamine's team first, whatever the result.
+        case when result = 'L' then score_second else score_first end as team_goals,
+        case when result = 'L' then score_first else score_second end as opponent_goals,
+        format(
+            '%d-%d',
+            case when result = 'L' then score_second else score_first end,
+            case when result = 'L' then score_first else score_second end
+        ) as score,
         result,
         league_slug,
         league_name as competition,
