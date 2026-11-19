@@ -2,7 +2,7 @@
 -- compares it with the mart. Any row returned = leakage or a broken window.
 with f as (
 
-    select event_id, game_date, career_match_number, sot_avg_prev5
+    select event_id, game_date, competitive_match_number, sot_avg_prev5
     from {{ ref('fct_lamine_match_features') }}
 
 ),
@@ -34,11 +34,12 @@ recomputed as (
 
 select event_id, feature_value, expected_value
 from recomputed
-where abs(feature_value - expected_value) > 1e-9
+where feature_value is null                        -- null with history = broken window
+   or abs(feature_value - expected_value) > 1e-9
 
 union all
 
--- the first career match has no history, so its feature must be null
+-- the first competitive match has no history, so its feature must be null
 select event_id, sot_avg_prev5, null
 from f
-where career_match_number = 1 and sot_avg_prev5 is not null
+where competitive_match_number = 1 and sot_avg_prev5 is not null

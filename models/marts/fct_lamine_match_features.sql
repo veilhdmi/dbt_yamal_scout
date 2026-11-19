@@ -23,11 +23,13 @@ features as (
         assists,
 
         -- features (X): ONLY matches BEFORE this one
-        row_number() over w_order                    as career_match_number,
+        row_number() over w_order                    as competitive_match_number,
+        count(*)             over w_prev5            as matches_in_prev5,
         avg(shots_on_target) over w_prev5            as sot_avg_prev5,
         avg(shots_on_target) over w_prev10           as sot_avg_prev10,
         avg(shots_on_target) over w_prev_all         as sot_career_avg_prev,
         avg(shots)           over w_prev5            as shots_avg_prev5,
+        avg(shots)           over w_prev10           as shots_avg_prev10,
         avg(goals)           over w_prev5            as goals_avg_prev5
 
     from matches

@@ -2,18 +2,116 @@ version: 2
 
 models:
   - name: fct_lamine_matches
-    description: "All matches Lamine Yamal played, for the chat agent. Friendlies flagged."
+    description: "All matches Lamine Yamal played (friendlies flagged). Table the chat agent queries."
     columns:
       - name: event_id
+        description: "ESPN match id. Primary key."
         data_tests: [unique, not_null]
+      - name: opponent_id
+        description: "ESPN team id of the opponent."
+      - name: game_date
+        description: "Kick-off timestamp (UTC)."
+      - name: match_date
+        description: "Match date in Madrid local time."
+      - name: season
+        description: "Season start year (2025 = 2025-26)."
+      - name: team
+        description: "Barcelona or Spain."
+      - name: opponent
+        description: "Opponent name."
+      - name: home_away
+        description: "'home' or 'away' from Lamine's team point of view."
+      - name: is_home
+        description: "True when Lamine's team played at home."
+      - name: score
+        description: "Final score, his team's goals first."
+      - name: result
+        description: "W, D or L for his team."
+      - name: league_slug
+        description: "ESPN competition code."
+      - name: competition
+        description: "Competition display name."
+      - name: competition_type
+        description: "league, champions_league, domestic_cup, national_team or friendly."
+      - name: stage
+        description: "Round or stage within the competition, when ESPN provides it."
+      - name: goals
+        description: "Goals scored."
+      - name: assists
+        description: "Assists."
+      - name: shots
+        description: "Total shots."
+      - name: shots_on_target
+        description: "Shots on target. Unreliable in friendlies (ESPN records 0)."
+      - name: fouls_suffered
+        description: "Fouls drawn."
+      - name: fouls_committed
+        description: "Fouls committed."
+      - name: offsides
+        description: "Times caught offside."
+      - name: yellow_cards
+        description: "Yellow cards."
+      - name: red_cards
+        description: "Red cards."
+      - name: ingested_at
+        description: "When the raw row was loaded from ESPN."
+      - name: career_match_number
+        description: "1 = his debut. Counts every match, friendlies included."
+        data_tests: [unique, not_null]
+      - name: is_friendly
+        description: "True for friendlies (excluded from the model)."
+        data_tests: [not_null]
 
   - name: fct_lamine_match_features
     description: "Model-ready rows: competitive matches only, point-in-time features (no leakage)."
     columns:
       - name: event_id
+        description: "ESPN match id. Primary key."
         data_tests: [unique, not_null]
+      - name: game_date
+        description: "Kick-off timestamp (UTC). Defines the order of every window."
+      - name: match_date
+        description: "Match date in Madrid local time."
+      - name: team
+        description: "Barcelona or Spain."
+      - name: opponent
+        description: "Opponent name."
+      - name: is_home
+        description: "Feature: True when Lamine's team played at home."
       - name: competition_type
+        description: "Feature: competition bucket. Friendlies are excluded here."
         data_tests:
           - accepted_values:
               arguments:
                 values: ['league', 'champions_league', 'domestic_cup', 'national_team']
+      - name: shots_on_target
+        description: "Target (Y): shots on target in this match."
+      - name: shots
+        description: "Target (Y): total shots in this match."
+      - name: goals
+        description: "Target (Y): goals in this match."
+      - name: assists
+        description: "Target (Y): assists in this match."
+      - name: competitive_match_number
+        description: "1 = first competitive match. Friendlies not counted (differs from fct_lamine_matches.career_match_number)."
+        data_tests: [unique, not_null]
+      - name: matches_in_prev5
+        description: "How many previous matches feed the *_prev5 averages (0-5). Below 5 the averages are noisy."
+        data_tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 5
+      - name: sot_avg_prev5
+        description: "Avg shots on target over the previous 5 competitive matches (current match excluded)."
+      - name: sot_avg_prev10
+        description: "Avg shots on target over the previous 10 competitive matches."
+      - name: sot_career_avg_prev
+        description: "Career avg shots on target before this match."
+      - name: shots_avg_prev5
+        description: "Avg shots over the previous 5 competitive matches."
+      - name: shots_avg_prev10
+        description: "Avg shots over the previous 10 competitive matches."
+      - name: goals_avg_prev5
+        description: "Avg goals over the previous 5 competitive matches."
