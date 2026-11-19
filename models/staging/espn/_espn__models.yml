@@ -1,0 +1,69 @@
+version: 2
+
+models:
+  - name: stg_espn__gamelog
+    description: "Cleaned ESPN game log: one row per match Lamine Yamal played."
+    data_tests:
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "shots_on_target <= shots"
+    columns:
+      - name: event_id
+        description: "ESPN match id. Primary key."
+        data_tests:
+          - unique
+          - not_null
+      - name: game_date
+        description: "Kick-off timestamp (UTC)."
+        data_tests:
+          - not_null
+      - name: team
+        description: "Barcelona or Spain. Null means ESPN sent a team_id we don't map yet."
+        data_tests:
+          - not_null
+      - name: home_away
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['home', 'away']
+      - name: is_home
+        description: "True when Lamine's team played at home."
+        data_tests:
+          - not_null
+      - name: league_slug
+        description: >
+          ESPN competition code. Every slug must be explicitly known here: a new
+          or misspelled slug fails the build instead of silently falling into
+          the 'friendly' bucket of competition_type.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - 'esp.1'
+                  - 'uefa.champions'
+                  - 'esp.copa_del_rey'
+                  - 'esp.super_cup'
+                  - 'esp.joan_gamper'
+                  - 'fifa.friendly'
+                  - 'fifa.world'
+                  - 'fifa.worldq.uefa'
+                  - 'uefa.euro'
+                  - 'uefa.nations'
+      - name: competition_type
+        description: "Model-level competition bucket. Includes 'friendly' here; the features mart removes it."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['league', 'champions_league', 'domestic_cup', 'national_team', 'friendly']
+      - name: shots
+        description: "Total shots in the match."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: shots_on_target
+        description: "Shots on target. Unreliable in friendlies (ESPN records 0)."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn

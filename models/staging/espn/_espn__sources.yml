@@ -17,4 +17,5 @@ sources:
           - name: event_id
             description: "ESPN match id."
             data_tests:
+              - unique
               - not_null

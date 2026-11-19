@@ -18,4 +18,3 @@ models:
     marts:
       +materialized: table
       +schema: yamal_marts
- 
