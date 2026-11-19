@@ -23,8 +23,12 @@ models:
         description: "'home' or 'away' from Lamine's team point of view."
       - name: is_home
         description: "True when Lamine's team played at home."
+      - name: team_goals
+        description: "Goals scored by Lamine's team."
+      - name: opponent_goals
+        description: "Goals conceded by Lamine's team."
       - name: score
-        description: "Final score, his team's goals first."
+        description: "Final score, his team's goals first (ESPN's raw score is winner-first)."
       - name: result
         description: "W, D or L for his team."
       - name: league_slug

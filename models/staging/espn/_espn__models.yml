@@ -7,6 +7,12 @@ models:
       - dbt_utils.expression_is_true:
           arguments:
             expression: "shots_on_target <= shots"
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: >
+              (result = 'W' and team_goals > opponent_goals)
+              or (result = 'D' and team_goals = opponent_goals)
+              or (result = 'L' and team_goals < opponent_goals)
     columns:
       - name: event_id
         description: "ESPN match id. Primary key."
